@@ -19,7 +19,7 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<?> me(@RequestHeader("Authorization") String authHeader){
-      
+
         boolean valid = authClient.validateToken(authHeader);
         if(!valid){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

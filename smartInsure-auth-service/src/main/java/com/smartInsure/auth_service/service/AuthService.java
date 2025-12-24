@@ -1,34 +1,46 @@
 package com.smartInsure.auth_service.service;
 
 
-import com.smartInsure.auth_service.store.UserStore;
-import com.smartInsure.auth_service.util.JwtUtil;
+import com.smartInsure.auth_service.entity.User;
+
+import com.smartInsure.auth_service.repository.UserRepository;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 @Service
 public class AuthService {
+
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public String register(String username,String password){
-        String encodedPassword = passwordEncoder.encode(password);
-        assert encodedPassword != null;
-        UserStore.USERS.put(username, encodedPassword);
-        return "User "+ username + "registered with password: "+ encodedPassword;
+    public void register(String username, String email, String password) {
+
+        if (userRepository.existsByUsername(username)) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+
+        userRepository.save(user);
     }
-    public boolean login(String username,String password){
-        String storedPassword = UserStore.USERS.get(username);
-        System.out.println("user "+username);
-        System.out.println("pwd "+storedPassword);
 
-        return  storedPassword !=null && passwordEncoder.matches(password,storedPassword);
+    public boolean login(String username, String password) {
+        return userRepository.findByUsername(username)
+                .map(u -> passwordEncoder.matches(password, u.getPassword()))
+                .orElse(false);
     }
-
-
 }

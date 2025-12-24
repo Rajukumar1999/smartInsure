@@ -7,6 +7,7 @@ import com.smartInsure.auth_service.service.AuthService;
 import com.smartInsure.auth_service.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.apache.juli.logging.Log;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -20,9 +21,12 @@ import org.springframework.web.bind.annotation.*;
     }
 
     @PostMapping("/register")
-        public String register(@RequestBody @Valid RegisterRequest registerRequest){
-            return authService.register(registerRequest.getUsername(),
-                                        registerRequest.getPassword());
+        public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest registerRequest){
+            authService.register(registerRequest.getUsername(),
+                                 registerRequest.getEmail(),
+                                 registerRequest.getPassword()
+            );
+        return ResponseEntity.ok("User Registered successfully");
     }
 
     @PostMapping("/login")
@@ -42,12 +46,12 @@ import org.springframework.web.bind.annotation.*;
 
     @PostMapping("/validate")
     public boolean validateToken(@RequestHeader("Authorization") String authHeader){
-        System.out.println("HEADER "+authHeader);
+
         if(authHeader==null || !authHeader.startsWith("Bearer ")) {
             return  false;
         }
         String token = authHeader.substring(7);
-        System.out.println("TOKEN"+ token);
+
         return JwtUtil.validateToken(token);
     }
 }

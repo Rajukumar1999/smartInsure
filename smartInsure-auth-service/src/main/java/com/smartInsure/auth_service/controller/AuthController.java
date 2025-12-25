@@ -4,11 +4,15 @@ import ch.qos.logback.core.subst.Token;
 import com.smartInsure.auth_service.dto.LoginRequest;
 import com.smartInsure.auth_service.dto.RegisterRequest;
 import com.smartInsure.auth_service.service.AuthService;
+
 import com.smartInsure.auth_service.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.apache.juli.logging.Log;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -16,8 +20,12 @@ import org.springframework.web.bind.annotation.*;
     public  class  AuthController{
     private final AuthService authService;
 
-    public AuthController(AuthService authService) {
+    private final JwtUtil jwtUtil;
+
+
+    public AuthController(AuthService authService, JwtUtil jwtUtil) {
         this.authService = authService;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/register")
@@ -41,17 +49,29 @@ import org.springframework.web.bind.annotation.*;
                     return "Invalid Credentials";
                 }
 
-        return JwtUtil.generatedToken(loginRequest.getUsername());
+        return jwtUtil.generatedToken(loginRequest.getUsername());
     }
 
     @PostMapping("/validate")
-    public boolean validateToken(@RequestHeader("Authorization") String authHeader){
+    public Map<String, Object> validateToken(
+            @RequestHeader("Authorization") String authHeader) {
 
-        if(authHeader==null || !authHeader.startsWith("Bearer ")) {
-            return  false;
+        System.out.println("RAW AUTH HEADER = [" + authHeader + "]");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Invalid Authorization header");
         }
-        String token = authHeader.substring(7);
 
-        return JwtUtil.validateToken(token);
+        // 🔥 MOST IMPORTANT LINE
+        String token = authHeader.replace("Bearer", "").trim();
+
+        System.out.println("JWT AFTER TRIM = [" + token + "]");
+
+        String username = jwtUtil.extractUsername(token);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("valid", true);
+        response.put("username", username);
+        return response;
     }
 }

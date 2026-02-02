@@ -2,45 +2,42 @@ package com.smartInsure.auth_service.service;
 
 
 import com.smartInsure.auth_service.entity.User;
-
 import com.smartInsure.auth_service.repository.UserRepository;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
+    private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository,
+    public AuthService(UserRepository repository,
                        PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+        this.repository = repository;
         this.passwordEncoder = passwordEncoder;
     }
 
     public void register(String username, String email, String password) {
 
-        if (userRepository.existsByUsername(username)) {
-            throw new RuntimeException("Username already exists");
-        }
-
-        if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("Email already exists");
-        }
-
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
+        user.setRole("USER");
 
-        userRepository.save(user);
+        repository.save(user);
     }
 
-    public boolean login(String username, String password) {
-        return userRepository.findByUsername(username)
-                .map(u -> passwordEncoder.matches(password, u.getPassword()))
-                .orElse(false);
+    public User authenticate(String username, String password) {
+
+        User user = repository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        return user;
     }
 }

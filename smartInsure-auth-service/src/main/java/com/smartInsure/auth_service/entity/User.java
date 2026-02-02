@@ -18,6 +18,15 @@ import jakarta.persistence.*;
         @Column(nullable = false)
         private String password;
 
+        private String role;
+
+        public User(String username, String email, String encode) {
+        }
+
+        public User() {
+
+        }
+
         // getters & setters
         public Long getId() {
             return id;
@@ -49,6 +58,14 @@ import jakarta.persistence.*;
 
         public void setPassword(String password) {
             this.password = password;
+        }
+
+        public String getRole() {
+            return role;
+        }
+
+        public void setRole(String role) {
+            this.role = role;
         }
     }
 

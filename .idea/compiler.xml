@@ -6,7 +6,13 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="smartinsure-policy-service" />
+        <module name="smartinsure-claim-service" />
         <module name="smartInsure-auth-service" />
+        <module name="smartinsure-notification" />
+        <module name="admin" />
+        <module name="smartinsure-gateway" />
+        <module name="smartinsure-common-service" />
       </profile>
       <profile name="Annotation profile for smartInsure-user-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -22,8 +28,14 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="admin" options="-parameters" />
       <module name="smartInsure-auth-service" options="-parameters" />
       <module name="smartInsure-user-service" options="-parameters" />
+      <module name="smartinsure-claim-service" options="-parameters" />
+      <module name="smartinsure-common-service" options="" />
+      <module name="smartinsure-gateway" options="-parameters" />
+      <module name="smartinsure-notification" options="-parameters" />
+      <module name="smartinsure-policy-service" options="-parameters" />
     </option>
   </component>
 </project>

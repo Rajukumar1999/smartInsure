@@ -2,24 +2,25 @@ package com.smartInsure.userservice.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
-
 @Entity
-@Table(name="user_profile")
+@Table(name = "user_profiles")
 public class UserProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String username;
-    private String fullname;
+
+    private String fullName;
     private String phone;
     private String address;
-    private LocalDateTime createdAt;
 
-    public void oneCreate(){
-        this.createdAt=LocalDateTime.now();
+    protected UserProfile() {}
+
+    public UserProfile(String username) {
+        this.username = username;
     }
 
     public Long getId() {
@@ -38,12 +39,12 @@ public class UserProfile {
         this.username = username;
     }
 
-    public String getFullname() {
-        return fullname;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setFullname(String fullname) {
-        this.fullname = fullname;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getPhone() {
@@ -60,13 +61,5 @@ public class UserProfile {
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }

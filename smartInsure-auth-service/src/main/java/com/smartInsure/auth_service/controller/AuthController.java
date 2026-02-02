@@ -1,27 +1,20 @@
 package com.smartInsure.auth_service.controller;
 
-import ch.qos.logback.core.subst.Token;
+import com.smartInsure.auth_service.dto.AuthValidateResponse;
 import com.smartInsure.auth_service.dto.LoginRequest;
 import com.smartInsure.auth_service.dto.RegisterRequest;
+import com.smartInsure.auth_service.entity.User;
 import com.smartInsure.auth_service.service.AuthService;
-
 import com.smartInsure.auth_service.util.JwtUtil;
 import jakarta.validation.Valid;
-import org.apache.juli.logging.Log;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
-
 @RestController
-    @RequestMapping("/auth")
-    public  class  AuthController{
+@RequestMapping("/auth")
+public class AuthController {
+
     private final AuthService authService;
-
     private final JwtUtil jwtUtil;
-
 
     public AuthController(AuthService authService, JwtUtil jwtUtil) {
         this.authService = authService;
@@ -29,49 +22,38 @@ import java.util.Map;
     }
 
     @PostMapping("/register")
-        public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest registerRequest){
-            authService.register(registerRequest.getUsername(),
-                                 registerRequest.getEmail(),
-                                 registerRequest.getPassword()
-            );
-        return ResponseEntity.ok("User Registered successfully");
+    public String register(@RequestBody @Valid RegisterRequest request) {
+        authService.register(
+                request.getUsername(),
+                request.getEmail(),
+                request.getPassword()
+        );
+        return "User registered successfully";
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody @Valid LoginRequest loginRequest){
-                 boolean success =
-                         authService.login(
-                                 loginRequest.getUsername(),
-                                 loginRequest.getPassword()
+    public String login(@RequestBody @Valid LoginRequest request) {
 
+        User user = authService.authenticate(
+                request.getUsername(),
+                request.getPassword()
         );
-                if(!success){
-                    return "Invalid Credentials";
-                }
 
-        return jwtUtil.generatedToken(loginRequest.getUsername());
+        return jwtUtil.generateToken(
+                user.getUsername(),
+                user.getRole()
+        );
     }
 
     @PostMapping("/validate")
-    public Map<String, Object> validateToken(
+    public AuthValidateResponse validate(
             @RequestHeader("Authorization") String authHeader) {
 
-        System.out.println("RAW AUTH HEADER = [" + authHeader + "]");
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Invalid Authorization header");
-        }
-
-        // 🔥 MOST IMPORTANT LINE
-        String token = authHeader.replace("Bearer", "").trim();
-
-        System.out.println("JWT AFTER TRIM = [" + token + "]");
+        String token = authHeader.substring(7);
 
         String username = jwtUtil.extractUsername(token);
+        String role = jwtUtil.extractRole(token);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("valid", true);
-        response.put("username", username);
-        return response;
+        return new AuthValidateResponse(true, username, role);
     }
 }

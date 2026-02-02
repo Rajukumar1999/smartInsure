@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/smartInsure.iml" filepath="$PROJECT_DIR$/.idea/smartInsure.iml" />
+      <module fileurl="file://$PROJECT_DIR$/smartInsure-user-service/smartInsure-user-service.iml" filepath="$PROJECT_DIR$/smartInsure-user-service/smartInsure-user-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/smartinsure-common-service.iml" filepath="$PROJECT_DIR$/smartinsure-common-service.iml" />
     </modules>
   </component>
 </project>

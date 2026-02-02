@@ -7,28 +7,26 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserProfileService {
-    private  final UserProfileRepository userProfileRepository;
 
+    private final UserProfileRepository repository;
 
-    public UserProfileService(UserProfileRepository userProfileRepository) {
-        this.userProfileRepository = userProfileRepository;
+    public UserProfileService(UserProfileRepository repository) {
+        this.repository = repository;
     }
 
-    public UserProfile getOrCreateProfile(String username){
-        return userProfileRepository.findByUsername(username)
-                .orElseGet(() ->{
-                    UserProfile userProfile  = new UserProfile();
-                    userProfile.setUsername(username);
-                    return userProfileRepository.save(userProfile);
-                });
+    public UserProfile getOrCreateProfile(String username) {
+        return repository.findByUsername(username)
+                .orElseGet(() -> repository.save(new UserProfile(username)));
     }
 
-    public UserProfile updateProfile(String username, UpdateProfileRequest request){
-        UserProfile profile = userProfileRepository.findByUsername(username)
-                .orElseThrow(()-> new RuntimeException("Profile not found"));
-        profile.setFullname(request.getFullName());
+    public UserProfile updateProfile(String username, UpdateProfileRequest request) {
+
+        UserProfile profile = getOrCreateProfile(username);
+
+        profile.setFullName(request.getFullName());
         profile.setPhone(request.getPhone());
         profile.setAddress(request.getAddress());
-        return userProfileRepository.save(profile);
+
+        return repository.save(profile);
     }
 }
